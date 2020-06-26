@@ -784,13 +784,9 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
                    didCropImage:(UIImage *)croppedImage
                   usingCropRect:(CGRect)cropRect {
 
-    // we have correct rect, but not correct dimensions
-    // so resize image
-    CGSize desiredImageSize = CGSizeMake([[[self options] objectForKey:@"width"] intValue],
-                                         [[[self options] objectForKey:@"height"] intValue]);
+    // we have correct rect, but not correct dimensions, but we may leave it that way for now
     
-    UIImage *resizedImage = [croppedImage resizedImageToFitInSize:desiredImageSize scaleIfSmaller:YES];
-    ImageResult *imageResult = [self.compression compressImage:resizedImage withOptions:self.options];
+    ImageResult *imageResult = [self.compression compressImage:croppedImage withOptions:self.options];
 
     NSString *filePath = [self persistFile:imageResult.data];
     if (filePath == nil) {
@@ -829,7 +825,9 @@ RCT_EXPORT_METHOD(openCropper:(NSDictionary *)options
     // create temp file
     NSString *tmpDirFullPath = [self getTmpDirectory];
     NSString *filePath = [tmpDirFullPath stringByAppendingString:[[NSUUID UUID] UUIDString]];
-    filePath = [filePath stringByAppendingString:@".jpg"];
+    NSString *mimeType = [self determineMimeTypeFromImageData:data];
+    NSString *extension = [mimeType isEqualToString:@"image/gif"] ? @".gif" : @".jpg";
+    filePath = [filePath stringByAppendingString:extension];
 
     // save cropped file
     BOOL status = [data writeToFile:filePath atomically:YES];
