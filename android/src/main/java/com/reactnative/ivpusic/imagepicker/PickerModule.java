@@ -774,6 +774,7 @@ class PickerModule extends ReactContextBaseJavaModule implements ActivityEventLi
 
             if (resultUri != null) {
                 try {
+
                     WritableMap result = getSelection(activity, resultUri, false);
 
                     if (result != null) {
